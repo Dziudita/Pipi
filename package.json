@@ -1,0 +1,16 @@
+{
+  "name": "pipi-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node api/message.ts"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}
