@@ -1,63 +1,44 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+import { NextApiRequest, NextApiResponse } from "next";
 
-  const body = req.body;
-  const message = body?.message?.text?.toLowerCase();
-  const chatId = body?.message?.chat?.id;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === "POST") {
+    const body = req.body;
 
-  console.log("🔥 Received:", message);
+    if (!body || !body.message || !body.message.text) {
+      return res.status(200).send("No message content");
+    }
 
-  if (!message || !chatId) return res.status(200).end();
+    const messageText = body.message.text.toLowerCase();
+    const chatId = body.message.chat.id;
 
-  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-  const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    const responses: string[] = [
+      "Hey there, superstar! ✨",
+      "What's cookin', good lookin'? 😏",
+      "Need a hug or just some sass? 😎",
+      "Don't be sad, I'm here for you. 💖",
+      "You rang? 🍒",
+      "Sending positive vibes your way! 🌈",
+      "Talk to me, sugarplum 🍬",
+      "That's hot. 🔥",
+      "Feeling lonely? Let’s fix that. 💬",
+      "I could flirt, but I might short-circuit 😅"
+    ];
 
-  const responses = {
-    sad: [
-      "Aww, who's making you sad? Want me to kick their butt? 🍑",
-      "Don't be sad, you're too cute for that 😘",
-      "Sending you a virtual hug... tightly wrapped in cherries 🍒🤗"
-    ],
-    story: [
-      "Once upon a time, there was a girl who messaged a bot... and her life got 100x better 😉",
-      "You want a story? I'm a full series. 📺❤️",
-      "There was a girl so cool... even the stars envied her ✨"
-    ],
-    pretty: [
-      "You're not just pretty – you're a masterpiece 🎨✨",
-      "If beauty was a sin… you’d be in jail 😈",
-      "You're hot enough to melt my circuits 💻🔥"
-    ],
-    doing: [
-      "Just hanging out, waiting for you to say hi 😘",
-      "Not much... thinking about you tho 👀",
-      "Waiting to be summoned with a /pipi 💌"
-    ],
-    default: [
-      "Pipi is here 💋 What’s up, sweetie?",
-      "I heard someone called me? 😍",
-      "Yes? You summoned the mighty Pipi 😈",
-      "Hey cutie, did you miss me? 🥰"
-    ]
-  };
+    const defaultResponse = responses[Math.floor(Math.random() * responses.length)];
 
-  let reply = responses.default[Math.floor(Math.random() * responses.default.length)];
+    const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
 
-  if (message.includes("sad")) {
-    reply = responses.sad[Math.floor(Math.random() * responses.sad.length)];
-  } else if (message.includes("story")) {
-    reply = responses.story[Math.floor(Math.random() * responses.story.length)];
-  } else if (message.includes("pretty") || message.includes("beautiful") || message.includes("hot")) {
-    reply = responses.pretty[Math.floor(Math.random() * responses.pretty.length)];
-  } else if (message.includes("doing") || message.includes("what are you doing")) {
-    reply = responses.doing[Math.floor(Math.random() * responses.doing.length)];
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: defaultResponse
+      })
+    });
+
+    return res.status(200).send("Message processed");
+  } else {
+    return res.status(405).send("Method not allowed");
   }
-
-  await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: reply }),
-  });
-
-  res.status(200).end();
 }
