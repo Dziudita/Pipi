@@ -1,20 +1,17 @@
 {
   "name": "telegram-bot-server",
   "version": "1.0.0",
-  "description": "Simple Telegram bot",
+  "description": "Telegram bot for group messages",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "next build"
+    "dev": "nodemon index.js",
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
-    "axios": "^1.6.7",
-    "dotenv": "^16.4.5",
-    "node-telegram-bot-api": "^0.61.0"
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "@types/node": "^20.11.30",
-    "@types/react": "^18.2.56"
+    "nodemon": "^3.0.0"
   }
 }
