@@ -1,14 +1,21 @@
-"scripts": {
-  "build": "next build"
-},
-"dependencies": {
-  "next": "latest",
-  "react": "latest",
-  "react-dom": "latest",
-  "telegraf": "^4.12.2"
-},
-"devDependencies": {
-  "typescript": "^4.9.5",
-  "@types/node": "^20.4.1",
-  "@types/react": "^18.2.14"
+{
+  "name": "telegram-bot-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest"
+  }
 }
