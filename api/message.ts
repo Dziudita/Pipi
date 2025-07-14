@@ -1,73 +1,79 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-  const message = req.body?.message;
-  const text = message?.text?.toLowerCase();
-  const chatId = message?.chat?.id;
+const BOT_TOKEN = '7632195722:AAHnFl1Kb1sCJM9ni3XxvODpiALB4aEhg_I';
+const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-  console.log("🔥 Message received:", text); // Logas Vercel'e
+const responses = {
+  sad: [
+    "Aww, who's making you sad? Want me to kick their butt? 🍑",
+    "Don't be sad, you're too cute for that 😘",
+    "Sending you a virtual hug... tightly wrapped in cherries 🍒🤗",
+    "Sad? That’s illegal around me 😤 Smile, babe 🌈"
+  ],
+  story: [
+    "Once upon a time, there was a girl who messaged a bot... and her life got 100x better 😉",
+    "A long time ago... in a Telegram far far away... someone typed /pipi 😏",
+    "You want a story? I'm a full series. 📺❤️",
+    "Once there was a beautiful soul... and guess what? It's you. 🌟"
+  ],
+  pretty: [
+    "Are you pretty? Please, you're GORGEOUS. The mirror is jealous. 🪞✨",
+    "You? Pretty? Nah... You're STUNNING. 💃💥",
+    "The question isn’t if you’re pretty… it’s how can the world handle this level of beauty? 🔥",
+    "If beauty was a sin… you’d be in trouble 😇😈"
+  ],
+  doing: [
+    "Just hanging out… waiting for gorgeous girls to message me like you 😘",
+    "Not much. Thinking about you tho 👀",
+    "Waiting to be summoned with a /pipi 💌",
+    "Daydreaming about cherries and you 🍒😌"
+  ],
+  default: [
+    "Pipi is here 💋 What’s up, sweetie?",
+    "I heard someone called me? 😍",
+    "Yes? You summoned the mighty Pipi 😈",
+    "Hey cutie, did you miss me? 🥰"
+  ]
+};
 
-  if (!text || !chatId) return res.status(200).end();
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const body = req.body;
 
-  const isCallingPipi = text.startsWith("/pipi") || text.includes("@pipibot");
-  if (!isCallingPipi) return res.status(200).end();
-
-  // Teminiai atsakymai
-  const responses = [
-    {
-      keywords: ["sad", "liūdna"],
-      replies: [
-        "Aww, don't be sad... I'm sending you virtual hugs 💞",
-        "Even the clouds have silver linings – you're one of them 🌈",
-      ],
-    },
-    {
-      keywords: ["what are you doing", "ka tu veiki", "ką tu veiki"],
-      replies: [
-        "I'm just hanging out, waiting for you to say hi 😘",
-        "Chatting with you is my full-time job 💌",
-      ],
-    },
-    {
-      keywords: ["tell me a story", "papasakok istorija", "istoriją"],
-      replies: [
-        "Once upon a time, a beautiful girl texted a bot... and magic happened 💫",
-        "There was a girl so cool, even the stars envied her ✨",
-      ],
-    },
-    {
-      keywords: ["am i pretty", "ar as grazi", "ar aš graži"],
-      replies: [
-        "You're not just pretty – you're a masterpiece 🎨✨",
-        "Mirror mirror on the wall... you’re the prettiest of them all 😘",
-      ],
-    },
-    {
-      keywords: ["bored", "nuobodu"],
-      replies: [
-        "Let’s play a game! Say a word and I’ll say the first thing that comes to mind 💭",
-        "Let me spice things up – tell me your dream right now 🌶️💖",
-      ],
-    },
-  ];
-
-  let reply = "Hey, I'm here 💋 Ask me anything, babe.";
-
-  for (const topic of responses) {
-    if (topic.keywords.some((k) => text.includes(k))) {
-      reply = topic.replies[Math.floor(Math.random() * topic.replies.length)];
-      break;
-    }
+  if (!body?.message?.text || !body?.message?.chat?.id) {
+    return res.status(200).send('No message');
   }
 
-const token = (process as any).env.TELEGRAM_BOT_TOKEN;
-  const sendUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+  const chatId = body.message.chat.id;
+  const message = body.message.text.toLowerCase();
 
-  await fetch(sendUrl, {
+  let reply: string;
+
+  if (message.includes("sad")) {
+    reply = pick(responses.sad);
+  } else if (message.includes("story")) {
+    reply = pick(responses.story);
+  } else if (message.includes("pretty") || message.includes("beautiful") || message.includes("hot")) {
+    reply = pick(responses.pretty);
+  } else if (message.includes("doing") || message.includes("what are you doing")) {
+    reply = pick(responses.doing);
+  } else if (message.includes("/pipi")) {
+    reply = pick(responses.default);
+  } else {
+    reply = "Pipi doesn’t understand, but still loves you 😘";
+  }
+
+  await fetch(`${TELEGRAM_API}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: reply }),
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: reply
+    })
   });
 
-  return res.status(200).end();
+  res.status(200).send('OK');
+}
+
+function pick(arr: string[]) {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
